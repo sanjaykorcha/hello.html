@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskTunes - Productivity & Music App</title>
+    
+    <!-- External Dependencies -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-icon">
+                <i class="fas fa-music"></i>
+            </div>
+            <h2>TaskTunes</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-music"></i>
+                    <span>TaskTunes</span>
+                </div>
+                <nav class="nav-tabs">
+                    <button class="nav-tab active" data-tab="dashboard">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button class="nav-tab" data-tab="tasks">
+                        <i class="fas fa-tasks"></i>
+                        <span>Tasks</span>
+                    </button>
+                    <button class="nav-tab" data-tab="music">
+                        <i class="fas fa-music"></i>
+                        <span>Music</span>
+                    </button>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="global-search" placeholder="Search tasks or music...">
+                </div>
+                <button class="theme-toggle" id="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-menu">
+                    <button class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Tab -->
+            <section id="dashboard-tab" class="tab-content active">
+                <div class="dashboard-grid">
+                    <!-- Quick Stats -->
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="completed-tasks">0</h3>
+                                <p>Completed Today</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="pending-tasks">0</h3>
+                                <p>Pending Tasks</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="songs-played">0</h3>
+                                <p>Songs Played</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Tasks -->
+                    <div class="recent-tasks-card">
+                        <h2>Recent Tasks</h2>
+                        <div id="recent-tasks-list" class="recent-tasks-list">
+                            <!-- Recent tasks will be populated here -->
+                        </div>
+                        <button class="view-all-btn" onclick="switchTab('tasks')">
+                            View All Tasks
+                        </button>
+                    </div>
+
+                    <!-- Now Playing -->
+                    <div class="now-playing-card">
+                        <h2>Now Playing</h2>
+                        <div id="dashboard-player" class="dashboard-player">
+                            <div class="no-music">
+                                <i class="fas fa-music"></i>
+                                <p>No music playing</p>
+                                <button onclick="switchTab('music')">Browse Music</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Productivity Chart -->
+                    <div class="productivity-card">
+                        <h2>Productivity Overview</h2>
+                        <div class="productivity-chart">
+                            <canvas id="productivity-canvas" width="300" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tasks Tab -->
+            <section id="tasks-tab" class="tab-content">
+                <div class="tasks-container">
+                    <div class="tasks-header">
+                        <h1>Task Manager</h1>
+                        <div class="tasks-actions">
+                            <div class="filter-dropdown">
+                                <button class="filter-btn">
+                                    <i class="fas fa-filter"></i>
+                                    Filter
+                                </button>
+                                <div class="filter-menu">
+                                    <button data-filter="all">All Tasks</button>
+                                    <button data-filter="pending">Pending</button>
+                                    <button data-filter="completed">Completed</button>
+                                    <button data-filter="high">High Priority</button>
+                                </div>
+                            </div>
+                            <button class="add-task-btn" id="add-task-btn">
+                                <i class="fas fa-plus"></i>
+                                Add Task
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Task Input Form -->
+                    <div id="task-form" class="task-form hidden">
+                        <div class="form-group">
+                            <input type="text" id="task-title" placeholder="Enter task title..." maxlength="100">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <select id="task-priority">
+                                    <option value="low">Low Priority</option>
+                                    <option value="medium">Medium Priority</option>
+                                    <option value="high">High Priority</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="date" id="task-due-date">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="task-description" placeholder="Add description (optional)..." rows="3"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="cancel-task">Cancel</button>
+                            <button type="button" id="save-task">Save Task</button>
+                        </div>
+                    </div>
+
+                    <!-- Tasks List -->
+                    <div class="tasks-list-container">
+                        <div id="tasks-list" class="tasks-list">
+                            <!-- Tasks will be populated here -->
+                        </div>
+                        <div id="no-tasks" class="no-tasks hidden">
+                            <i class="fas fa-tasks"></i>
+                            <h3>No tasks yet</h3>
+                            <p>Create your first task to get started</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Music Tab -->
+            <section id="music-tab" class="tab-content">
+                <div class="music-container">
+                    <div class="music-header">
+                        <h1>Music Library</h1>
+                        <div class="music-actions">
+                            <button class="create-playlist-btn">
+                                <i class="fas fa-plus"></i>
+                                Create Playlist
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Music Categories -->
+                    <div class="music-categories">
+                        <div class="category-section">
+                            <h2>Recently Played</h2>
+                            <div class="music-grid" id="recently-played">
+                                <!-- Recent music cards -->
+                            </div>
+                        </div>
+
+                        <div class="category-section">
+                            <h2>Focus Music</h2>
+                            <div class="music-grid" id="focus-music">
+                                <!-- Focus music cards -->
+                            </div>
+                        </div>
+
+                        <div class="category-section">
+                            <h2>Popular Playlists</h2>
+                            <div class="music-grid" id="popular-playlists">
+                                <!-- Popular playlist cards -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Music Player Bar -->
+        <footer class="music-player" id="music-player">
+            <div class="player-content">
+                <div class="current-track">
+                    <div class="track-artwork">
+                        <img id="track-image" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23333'/><text x='50' y='55' text-anchor='middle' fill='white' font-size='30'>♪</text></svg>" alt="Track artwork">
+                    </div>
+                    <div class="track-info">
+                        <h4 id="track-title">No track selected</h4>
+                        <p id="track-artist">Select music to play</p>
+                    </div>
+                    <button class="favorite-btn" id="favorite-btn">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+
+                <div class="player-controls">
+                    <div class="control-buttons">
+                        <button class="control-btn" id="shuffle-btn">
+                            <i class="fas fa-random"></i>
+                        </button>
+                        <button class="control-btn" id="prev-btn">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button class="control-btn primary" id="play-pause-btn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="control-btn" id="next-btn">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                        <button class="control-btn" id="repeat-btn">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                    <div class="progress-container">
+                        <span class="time" id="current-time">0:00</span>
+                        <div class="progress-bar">
+                            <input type="range" id="progress-slider" min="0" max="100" value="0">
+                        </div>
+                        <span class="time" id="duration">0:00</span>
+                    </div>
+                </div>
+
+                <div class="player-extras">
+                    <button class="control-btn" id="volume-btn">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <div class="volume-container">
+                        <input type="range" id="volume-slider" min="0" max="100" value="70">
+                    </div>
+                    <button class="control-btn" id="queue-btn">
+                        <i class="fas fa-list"></i>
+                    </button>
+                    <button class="control-btn" id="fullscreen-btn">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Queue Panel -->
+        <div id="queue-panel" class="queue-panel hidden">
+            <div class="queue-header">
+                <h3>Queue</h3>
+                <button id="close-queue">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="queue-list" id="queue-list">
+                <!-- Queue items will be populated here -->
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div id="modal-overlay" class="modal-overlay hidden">
+            <!-- Playlist Creation Modal -->
+            <div id="playlist-modal" class="modal hidden">
+                <div class="modal-header">
+                    <h3>Create New Playlist</h3>
+                    <button class="close-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Playlist Name</label>
+                        <input type="text" id="playlist-name" placeholder="Enter playlist name...">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="playlist-description" placeholder="Add description (optional)..." rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary close-modal">Cancel</button>
+                    <button class="btn-primary" id="create-playlist">Create</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Element -->
+        <audio id="audio-player" preload="metadata">
+            Your browser does not support the audio element.
+        </audio>
+
+        <!-- Notifications Container -->
+        <div id="notifications" class="notifications-container"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
